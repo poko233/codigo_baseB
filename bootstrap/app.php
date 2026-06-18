@@ -12,11 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'rol'  => \App\Http\Middleware\TieneRol::class,
-            'role' => \App\Http\Middleware\CheckRolNombre::class,
-        ]);
-        // ← NO va nada más acá
+        // $middleware->alias([
+        //     'rol'  => \App\Http\Middleware\TieneRol::class,
+        //     'role' => \App\Http\Middleware\CheckRolNombre::class,
+        // ]);
+        $middleware->alias(['permiso' => \App\Auth\Middleware\CheckPermission::class]);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

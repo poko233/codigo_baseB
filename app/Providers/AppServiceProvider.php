@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\User;
 use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
+use App\Modules\Empresas\Observers\EmpresaObserver;
+use App\Modules\Empresas\Models\Empresa;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        Empresa::observe(EmpresaObserver::class);
     }
 
     /**

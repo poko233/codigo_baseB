@@ -2,14 +2,14 @@
 
 namespace App\Shared\Traits;
 
-use App\Shared\Scopes\EmpresaScope;
+use App\Shared\Scopes\empresacope;
 use Illuminate\Database\Eloquent\Builder;
 
 trait BelongsToEmpresa
 {
     protected static function bootBelongsToEmpresa(): void
     {
-        static::addGlobalScope(new EmpresaScope);
+        static::addGlobalScope(new empresacope);
     }
 
     // Escapes de emergencia
@@ -21,7 +21,7 @@ trait BelongsToEmpresa
      */
     public static function sinFiltroEmpresa(): Builder
     {
-        return static::withoutGlobalScope(EmpresaScope::class);
+        return static::withoutGlobalScope(empresacope::class);
     }
 
     /**
@@ -32,7 +32,7 @@ trait BelongsToEmpresa
      */
     public static function deEmpresa(int $idEmpresa): Builder
     {
-        return static::withoutGlobalScope(EmpresaScope::class)
+        return static::withoutGlobalScope(empresacope::class)
                      ->where('id_empresa', $idEmpresa);
     }
 }

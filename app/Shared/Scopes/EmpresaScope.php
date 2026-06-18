@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 
-class EmpresaScope implements Scope
+class empresacope implements Scope
 {
    
     public function apply(Builder $builder, Model $model): void
@@ -27,10 +27,10 @@ class EmpresaScope implements Scope
         }
 
         $user = Auth::user();
-        if ($user && method_exists($user, 'empresas')) {
-            $empresa = $user->relationLoaded('empresas')
-                ? $user->empresas->first()
-                : $user->empresas()->first();
+        if ($user && method_exists($user, 'empresa')) {
+            $empresa = $user->relationLoaded('empresa')
+                ? $user->empresa->first()
+                : $user->empresa()->first();
 
             return $empresa?->id;
         }

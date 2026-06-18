@@ -9,7 +9,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $table = 'users';
+    protected $table = 'user';
 
     protected $fillable = [
         'usuario', 'password', 'ci', 'nombres', 'primer_apellido',
@@ -19,7 +19,7 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'codigo_qr', 'verificacion'];
 
-    public function empresas()
+    public function empresa()
     {
         return $this->belongsToMany(
             \App\Shared\Models\Empresa::class,
@@ -27,7 +27,7 @@ class User extends Authenticatable
         );
     }
 
-    public function roles()
+    public function rol()
     {
         return $this->belongsToMany(
             \App\Shared\Models\Role::class,

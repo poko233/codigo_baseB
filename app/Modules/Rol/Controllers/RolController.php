@@ -16,10 +16,10 @@ class RolController extends Controller
 
     public function index(Request $request)
     {
-        $roles = $this->service->listar(
+        $rol = $this->service->listar(
             $request->only(['estado', 'buscar', 'por_pagina'])
         );
-        return RolResource::collection($roles);
+        return RolResource::collection($rol);
     }
 
     public function show(Rol $rol)

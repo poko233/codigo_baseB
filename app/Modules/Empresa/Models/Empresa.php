@@ -11,8 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Empresa extends Model
 {
-    protected $table = 'empresas';
+    protected $table = 'empresa';
     protected $guarded = ['id'];
+    public $timestamps = false; 
 
     protected $casts = [
         'tipo_cambio' => 'decimal:2',
@@ -20,7 +21,7 @@ class Empresa extends Model
     ];
 
 
-    public function users()
+    public function user()
     {
         return $this->belongsToMany(
             User::class,
@@ -30,7 +31,7 @@ class Empresa extends Model
         );
     }
 
-    public function roles()
+    public function rol()
     {
         return $this->hasMany(Rol::class, 'id_empresa');
     }

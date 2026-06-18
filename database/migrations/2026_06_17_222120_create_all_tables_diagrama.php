@@ -4,50 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Migración consolidada: Diagrama_en_blanco.csv
- *
- * Contiene la creación de TODAS las tablas del diagrama UML en una sola
- * migración, en el orden correcto para que ninguna llave foránea falle.
- *
- * Orden de creación (up):
- *   1.  migrations               (meta-tabla de Laravel, protegida con hasTable)
- *   2.  password_reset_codes     (sin FKs)
- *   3.  personal_access_tokens   (sin FKs - Sanctum)
- *   4.  empresas                 (raíz)
- *   5.  users                    (raíz)
- *   6.  acciones                 (raíz)
- *   7.  sucursales               (FK -> empresas)
- *   8.  roles                    (FK -> empresas)
- *   9.  modulos                  (FK -> empresas)
- *   10. formularios              (FK -> empresas)
- *   11. user_empresas            (pivote: users + empresas)
- *   12. user_sucursales          (pivote: users + sucursales)
- *   13. user_roles               (pivote: users + roles)
- *   14. modulo_roles             (pivote: modulos + roles)
- *   15. formulario_modulos       (pivote: formularios + modulos)
- *   16. formulario_permisos      (pivote: roles + modulos + formularios + acciones)
- *
- * El down() elimina las tablas en el orden EXACTAMENTE inverso, para que
- * ninguna llave foránea impida el DROP.
- *
- * NOTAS IMPORTANTES (pendientes de confirmación con el usuario):
- * - `genero` y `expedido` en `users` estaban como enum(9) / enum(4) en el
- *   CSV (Lucidchart trunca los valores reales del enum). Se dejaron como
- *   string() hasta confirmar los valores exactos.
- * - `acciones` no tenía timestamps en el diagrama; se agregaron igual
- *   porque la regla general pide timestamps() en todas las tablas.
- * - `migrations` ya es creada automáticamente por el framework; se protege
- *   con Schema::hasTable() para evitar error de "tabla ya existe".
- */
+
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+   
     public function up(): void
     {
-        // 2. password_reset_codes (sin FKs)
         Schema::create('password_reset_codes', function (Blueprint $table) {
             $table->id();
             $table->string('correo');
@@ -59,7 +21,6 @@ return new class extends Migration
             $table->index('code');
         });
 
-        // 3. personal_access_tokens (sin FKs - estándar Sanctum)
         Schema::create('personal_access_tokens', function (Blueprint $table) {
             $table->id();
             $table->morphs('tokenable');
@@ -71,8 +32,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 4. empresas (raíz, sin FKs)
-        Schema::create('empresas', function (Blueprint $table) {
+        Schema::create('empresa', function (Blueprint $table) {
             $table->id();
             $table->string('empresa', 100);
             $table->text('slogan')->nullable();
@@ -106,10 +66,10 @@ return new class extends Migration
             $table->string('smtp_correo', 100)->nullable();
             $table->string('correo_institucional', 80)->nullable();
             $table->string('pwd_institucional', 80)->nullable();
+            $table->timestamps(); 
         });
 
-        // 5. users (raíz, sin FKs)
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('user', function (Blueprint $table) {
             $table->id();
             $table->string('usuario', 40)->unique();
             $table->string('password', 80);
@@ -131,17 +91,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 6. acciones (raíz, sin FKs)
-        Schema::create('acciones', function (Blueprint $table) {
+        Schema::create('accion', function (Blueprint $table) {
             $table->id();
             $table->text('accion');
         });
 
-        // 7. sucursales (FK -> empresas)
-        Schema::create('sucursales', function (Blueprint $table) {
+        Schema::create('sucursal', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_empresa')
-                ->constrained('empresas')
+                ->constrained('empresa')
                 ->onDelete('cascade');
             $table->string('sucursal', 40);
             $table->string('responsable', 40)->nullable();
@@ -160,11 +118,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 8. roles (FK -> empresas)
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('rol', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_empresa')
-                ->constrained('empresas')
+                ->constrained('empresa')
                 ->onDelete('cascade');
             $table->string('rol', 40);
             $table->text('descripcion')->nullable();
@@ -172,11 +129,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 9. modulos (FK -> empresas)
-        Schema::create('modulos', function (Blueprint $table) {
+        Schema::create('modulo', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_empresa')
-                ->constrained('empresas')
+                ->constrained('empresa')
                 ->onDelete('cascade');
             $table->string('modulo', 40);
             $table->text('descripcion')->nullable();
@@ -185,11 +141,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 10. formularios (FK -> empresas)
-        Schema::create('formularios', function (Blueprint $table) {
+        Schema::create('formulario', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_empresa')
-                ->constrained('empresas')
+                ->constrained('empresa')
                 ->onDelete('cascade');
             $table->string('formulario', 40);
             $table->text('descripcion')->nullable();
@@ -198,92 +153,80 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 11. user_empresas (pivote: users + empresas)
         Schema::create('user_empresa', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_user')
-                ->constrained('users')
+                ->constrained('user')
                 ->onDelete('cascade');
             $table->foreignId('id_empresa')
-                ->constrained('empresas')
+                ->constrained('empresa')
                 ->onDelete('cascade');
             $table->timestamps();
         });
 
-        // 12. user_sucursales (pivote: users + sucursales)
         Schema::create('user_sucursal', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_user')
-                ->constrained('users')
+                ->constrained('user')
                 ->onDelete('cascade');
             $table->foreignId('id_sucursal')
-                ->constrained('sucursales')
+                ->constrained('sucursal')
                 ->onDelete('cascade');
             $table->timestamps();
         });
 
-        // 13. user_roles (pivote: users + roles)
         Schema::create('user_rol', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_user')
-                ->constrained('users')
+                ->constrained('user')
                 ->onDelete('cascade');
             $table->foreignId('id_rol')
-                ->constrained('roles')
+                ->constrained('rol')
                 ->onDelete('cascade');
             $table->timestamps();
         });
 
-        // 14. modulo_roles (pivote: modulos + roles)
         Schema::create('modulo_rol', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_rol')
-                ->constrained('roles')
+                ->constrained('rol')
                 ->onDelete('cascade');
             $table->foreignId('id_modulo')
-                ->constrained('modulos')
+                ->constrained('modulo')
                 ->onDelete('cascade');
             $table->timestamps();
         });
 
-        // 15. formulario_modulos (pivote: formularios + modulos)
         Schema::create('formulario_modulo', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_modulo')
-                ->constrained('modulos')
+                ->constrained('modulo')
                 ->onDelete('cascade');
             $table->foreignId('id_formulario')
-                ->constrained('formularios')
+                ->constrained('formulario')
                 ->onDelete('cascade');
             $table->timestamps();
         });
 
-        // 16. formulario_permisos (pivote: roles + modulos + formularios + acciones)
         Schema::create('formulario_permiso', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_rol')
-                ->constrained('roles')
+                ->constrained('rol')
                 ->onDelete('cascade');
             $table->foreignId('id_modulo')
-                ->constrained('modulos')
+                ->constrained('modulo')
                 ->onDelete('cascade');
             $table->foreignId('id_formulario')
-                ->constrained('formularios')
+                ->constrained('formulario')
                 ->onDelete('cascade');
             $table->foreignId('id_accion')
-                ->constrained('acciones')
+                ->constrained('accion')
                 ->onDelete('cascade');
             $table->timestamps();
 
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * Orden EXACTAMENTE inverso al de up(), para que ninguna FK bloquee
-     * el DROP de una tabla referenciada.
-     */
     public function down(): void
     {
 

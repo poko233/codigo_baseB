@@ -18,8 +18,8 @@ class CheckPermission
 
         // 2. VALIDAR que el usuario realmente pertenece a esa empresa
         //    Si manda un id inventado → 403 inmediato
-        $perteneceAEmpresa = $user->empresas()
-            ->where('empresas.id', (int) $idEmpresa)
+        $perteneceAEmpresa = $user->empresa()
+            ->where('empresa.id', (int) $idEmpresa)
             ->exists();
 
         if (! $idEmpresa || ! $perteneceAEmpresa) {

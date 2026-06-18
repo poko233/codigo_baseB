@@ -4,26 +4,26 @@ use App\Modules\Rol\Controllers\RolController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])
-    ->prefix('roles')
+    ->prefix('rol')
     ->group(function () {
 
         Route::get('/', [RolController::class, 'index'])
-            ->middleware('permiso:Roles,Listado,Ver');
+            ->middleware('permiso:rol,Listado,Ver');
 
         Route::get('/{rol}', [RolController::class, 'show'])
-            ->middleware('permiso:Roles,Detalle,Ver');
+            ->middleware('permiso:rol,Detalle,Ver');
 
         Route::post('/', [RolController::class, 'store'])
-            ->middleware('permiso:Roles,Listado,Crear');
+            ->middleware('permiso:rol,Listado,Crear');
 
         Route::put('/{rol}',   [RolController::class, 'update'])
-            ->middleware('permiso:Roles,Detalle,Editar');
+            ->middleware('permiso:rol,Detalle,Editar');
         Route::patch('/{rol}', [RolController::class, 'update'])
-            ->middleware('permiso:Roles,Detalle,Editar');
+            ->middleware('permiso:rol,Detalle,Editar');
 
         Route::put('/{rol}/permisos', [RolController::class, 'syncPermisos'])
-            ->middleware('permiso:Roles,Permisos,Editar');
+            ->middleware('permiso:rol,Permisos,Editar');
 
         Route::delete('/{rol}', [RolController::class, 'destroy'])
-            ->middleware('permiso:Roles,Detalle,Eliminar');
+            ->middleware('permiso:rol,Detalle,Eliminar');
     });

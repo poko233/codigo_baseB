@@ -64,7 +64,7 @@ class RolService
 
     public function eliminar(Rol $rol): void
     {
-        if ($rol->users()->exists()) {
+        if ($rol->user()->exists()) {
             abort(422, 'No se puede eliminar un rol que tiene usuarios asignados.');
         }
         $this->repo->eliminar($rol);

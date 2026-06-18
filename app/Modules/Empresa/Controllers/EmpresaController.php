@@ -6,18 +6,18 @@ use App\Modules\Empresa\Models\Empresa;
 use App\Modules\Empresa\Requests\StoreEmpresaRequest;
 use App\Modules\Empresa\Requests\UpdateEmpresaRequest;
 use App\Modules\Empresa\Resources\EmpresaResource;
-use App\Modules\Empresa\Services\EmpresaService;
+use App\Modules\Empresa\Services\empresaervice;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class EmpresaController extends Controller
 {
-    public function __construct(private EmpresaService $service) {}
+    public function __construct(private empresaervice $service) {}
 
     public function index(Request $request)
     {
-        $empresas = $this->service->listar($request->only(['estado', 'buscar', 'por_pagina']));
-        return EmpresaResource::collection($empresas);
+        $empresa = $this->service->listar($request->only(['estado', 'buscar', 'por_pagina']));
+        return EmpresaResource::collection($empresa);
     }
     public function show(Empresa $empresa)
     {

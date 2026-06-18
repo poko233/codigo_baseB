@@ -2,10 +2,10 @@
 
 namespace App\Modules\Empresa\Services;
 
-use App\Modules\empresa\Models\Empresa;
+use App\Modules\Empresa\Models\Empresa;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class empresaervice
+class EmpresaService
 {
     public function listar(array $filtros = []): LengthAwarePaginator
     {
@@ -32,13 +32,6 @@ class empresaervice
 
     public function eliminar(Empresa $empresa): void
     {
-        // Soft-check: no elimina si tiene usuarios activos
-        $tieneUsuarios = $empresa->user()->exists() ?? false;
-
-        if ($tieneUsuarios) {
-            abort(422, 'No se puede eliminar una empresa con usuarios asignados.');
-        }
-
         $empresa->delete();
     }
 }

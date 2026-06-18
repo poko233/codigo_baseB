@@ -10,9 +10,7 @@ class DatosInicialesSeeder extends Seeder
 {
     public function run(): void
     {
-        // ============================================================
-        // PASO 1: Empresa
-        // ============================================================
+        // ========== EMPRESA ==========
         DB::table('empresa')->insert([
             'empresa'     => 'Mi Empresa Principal',
             'sigla'       => 'MEP',
@@ -23,19 +21,15 @@ class DatosInicialesSeeder extends Seeder
             'updated_at'  => now(),
         ]);
 
-        // ============================================================
-        // PASO 2: Acciones (Ver=1, Crear=2, Editar=3, Eliminar=4)
-        // ============================================================
+        // ========== ACCIONES (sin timestamps) ==========
         DB::table('accion')->insert([
-            ['accion' => 'Ver',      'created_at' => now(), 'updated_at' => now()],
-            ['accion' => 'Crear',    'created_at' => now(), 'updated_at' => now()],
-            ['accion' => 'Editar',   'created_at' => now(), 'updated_at' => now()],
-            ['accion' => 'Eliminar', 'created_at' => now(), 'updated_at' => now()],
+            ['accion' => 'Ver'],
+            ['accion' => 'Crear'],
+            ['accion' => 'Editar'],
+            ['accion' => 'Eliminar'],
         ]);
 
-        // ============================================================
-        // PASO 3: Roles para la empresa
-        // ============================================================
+        // ========== ROLES ==========
         DB::table('rol')->insert([
             [
                 'id_empresa'  => 1,
@@ -48,31 +42,27 @@ class DatosInicialesSeeder extends Seeder
             [
                 'id_empresa'  => 1,
                 'rol'         => 'Cajero',
-                'descripcion' => 'Solo puede ver y editar. No puede eliminar.',
+                'descripcion' => 'Solo puede ver y editar.',
                 'estado'      => 'Activo',
                 'created_at'  => now(),
                 'updated_at'  => now(),
             ],
         ]);
 
-        // ============================================================
-        // PASO 4: Usuario admin
-        // ============================================================
+        // ========== USUARIO ==========
         DB::table('user')->insert([
-            'usuario'          => 'admin',
-            'password'         => Hash::make('admin123'),
-            'ci'               => '12345678',
-            'nombres'          => 'Super',
-            'primer_apellido'  => 'Admin',
-            'email'            => 'admin@miempresa.com',
-            'estado'           => 'Activo',
-            'created_at'       => now(),
-            'updated_at'       => now(),
+            'usuario'         => 'admin',
+            'password'        => Hash::make('admin123'),
+            'ci'              => '12345678',
+            'nombres'         => 'Super',
+            'primer_apellido' => 'Admin',
+            'email'           => 'admin@miempresa.com',
+            'estado'          => 'Activo',
+            'created_at'      => now(),
+            'updated_at'      => now(),
         ]);
 
-        // ============================================================
-        // PASO 5: Vincular usuario → empresa
-        // ============================================================
+        // ========== USER ↔ EMPRESA ==========
         DB::table('user_empresa')->insert([
             'id_user'    => 1,
             'id_empresa' => 1,
@@ -80,9 +70,7 @@ class DatosInicialesSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // ============================================================
-        // PASO 6: Vincular usuario → rol Admin
-        // ============================================================
+        // ========== USER ↔ ROL ==========
         DB::table('user_rol')->insert([
             'id_user'    => 1,
             'id_rol'     => 1,
@@ -90,9 +78,7 @@ class DatosInicialesSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // ============================================================
-        // PASO 7: Módulos base
-        // ============================================================
+        // ========== MÓDULOS ==========
         DB::table('modulo')->insert([
             [
                 'id_empresa'  => 1,
@@ -112,9 +98,7 @@ class DatosInicialesSeeder extends Seeder
             ],
         ]);
 
-        // ============================================================
-        // PASO 8: Formularios base
-        // ============================================================
+        // ========== FORMULARIOS ==========
         DB::table('formulario')->insert([
             [
                 'id_empresa'  => 1,
@@ -145,9 +129,7 @@ class DatosInicialesSeeder extends Seeder
             ],
         ]);
 
-        // ============================================================
-        // PASO 9: Vincular formularios a módulos
-        // ============================================================
+        // ========== FORMULARIO ↔ MÓDULO ==========
         DB::table('formulario_modulo')->insert([
             ['id_modulo' => 1, 'id_formulario' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['id_modulo' => 1, 'id_formulario' => 2, 'created_at' => now(), 'updated_at' => now()],
@@ -156,38 +138,32 @@ class DatosInicialesSeeder extends Seeder
             ['id_modulo' => 2, 'id_formulario' => 2, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        // ============================================================
-        // PASO 10: Dar TODOS los permisos al rol Admin (id_rol=1)
-        // ============================================================
+        // ========== PERMISOS AL ROL ADMIN ==========
         DB::table('formulario_permiso')->insert([
-            // Roles - Listado: Ver, Crear, Editar, Eliminar
+            // Roles - Listado
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 1, 'id_accion' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 1, 'id_accion' => 2, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 1, 'id_accion' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 1, 'id_accion' => 4, 'created_at' => now(), 'updated_at' => now()],
-            // Roles - Detalle: Ver, Crear, Editar, Eliminar
+            // Roles - Detalle
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 2, 'id_accion' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 2, 'id_accion' => 2, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 2, 'id_accion' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 2, 'id_accion' => 4, 'created_at' => now(), 'updated_at' => now()],
-            // Roles - Permisos: Editar
+            // Roles - Permisos
             ['id_rol' => 1, 'id_modulo' => 1, 'id_formulario' => 3, 'id_accion' => 3, 'created_at' => now(), 'updated_at' => now()],
-            // Empresas - Listado: Ver, Crear, Editar, Eliminar
+            // Empresas - Listado
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 1, 'id_accion' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 1, 'id_accion' => 2, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 1, 'id_accion' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 1, 'id_accion' => 4, 'created_at' => now(), 'updated_at' => now()],
-            // Empresas - Detalle: Ver, Editar, Eliminar
+            // Empresas - Detalle
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 2, 'id_accion' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 2, 'id_accion' => 3, 'created_at' => now(), 'updated_at' => now()],
             ['id_rol' => 1, 'id_modulo' => 2, 'id_formulario' => 2, 'id_accion' => 4, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
-        echo "\n✅ DATOS INSERTADOS CORRECTAMENTE\n";
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-        echo "👤 Usuario: admin\n";
-        echo "🔑 Password: admin123\n";
-        echo "🏢 Empresa: Mi Empresa Principal\n";
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n";
+        echo "\n✅ DATOS INSERTADOS\n";
+        echo "👤 admin / admin123\n\n";
     }
 }

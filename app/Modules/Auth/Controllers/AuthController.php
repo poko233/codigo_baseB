@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\Auth\Controllers;
 
 use App\Modules\Auth\Requests\LoginRequest;

@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 
-class empresacope implements Scope
+class EmpresaScope implements Scope
 {
-   
     public function apply(Builder $builder, Model $model): void
     {
         $idEmpresa = $this->resolveEmpresaId();

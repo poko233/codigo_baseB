@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Modules\Empresas\Controllers;
+namespace App\Modules\Empresa\Controllers;
 
-use App\Modules\Empresas\Models\Empresa;
-use App\Modules\Empresas\Requests\StoreEmpresaRequest;
-use App\Modules\Empresas\Requests\UpdateEmpresaRequest;
-use App\Modules\Empresas\Resources\EmpresaResource;
-use App\Modules\Empresas\Services\EmpresaService;
+use App\Modules\Empresa\Models\Empresa;
+use App\Modules\Empresa\Requests\StoreEmpresaRequest;
+use App\Modules\Empresa\Requests\UpdateEmpresaRequest;
+use App\Modules\Empresa\Resources\EmpresaResource;
+use App\Modules\Empresa\Services\EmpresaService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 

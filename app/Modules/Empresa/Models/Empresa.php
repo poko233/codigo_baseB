@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Empresas\Models;
+namespace App\Empresa\Models;
 
 use App\Modules\Auth\Models\User;
-use App\Modules\Roles\Models\Rol;
-use App\Modules\Modulos\Models\Modulo;
-use App\Modules\Formularios\Models\Formulario;
-use App\Modules\Sucursales\Models\Sucursal;
+use App\Modules\Rol\Models\Rol;
+use App\Modules\Modulo\Models\Modulo;
+use App\Modules\Formulario\Models\Formulario;
+use App\Modules\Sucursal\Models\Sucursal;
 use Illuminate\Database\Eloquent\Model;
 
 class Empresa extends Model

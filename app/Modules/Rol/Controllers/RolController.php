@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Modules\Roles\Controllers;
+namespace App\Modules\Rol\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Roles\Models\Rol;
-use App\Modules\Roles\Requests\StoreRolRequest;
-use App\Modules\Roles\Requests\UpdateRolRequest;
-use App\Modules\Roles\Resources\RolResource;
-use App\Modules\Roles\Services\RolService;
+use App\Modules\Rol\Models\Rol;
+use App\Modules\Rol\Requests\StoreRolRequest;
+use App\Modules\Rol\Requests\UpdateRolRequest;
+use App\Modules\Rol\Resources\RolResource;
+use App\Modules\Rol\Services\RolService;
 use Illuminate\Http\Request;
 
 class RolController extends Controller

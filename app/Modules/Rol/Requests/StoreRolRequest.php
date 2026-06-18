@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Roles\Requests;
+namespace App\Modules\Rol\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -11,6 +11,7 @@ class StoreRolRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id_empresa'  => ['required', 'integer', 'exists:empresas,id'],
             'rol'         => ['required', 'string', 'max:40'],
             'descripcion' => ['nullable', 'string'],
             'estado'      => ['nullable', 'in:Activo,Inactivo'],

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Empresas\Services;
+namespace App\Modules\Empresa\Services;
 
-use App\Empresas\Models\Empresa;
+use App\Modules\Empresas\Models\Empresa;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EmpresaService

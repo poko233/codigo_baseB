@@ -1,6 +1,6 @@
 <?php
 
-use App\Modules\Empresas\Controllers\EmpresaController;
+use App\Modules\Empresa\Controllers\EmpresaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])

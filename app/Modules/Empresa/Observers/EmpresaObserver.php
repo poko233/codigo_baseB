@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Modules\Empresas\Observers;
+namespace App\Modules\Empresa\Observers;
 
-use App\Modules\Empresas\Models\Empresa;
-use App\Modules\Roles\Models\Rol;
+use App\Modules\Empresa\Models\Empresa;
+use App\Modules\Rol\Models\Rol;
 
 class EmpresaObserver
 {

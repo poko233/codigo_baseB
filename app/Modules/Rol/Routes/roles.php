@@ -1,6 +1,6 @@
 <?php
 
-use App\Modules\Roles\Controllers\RolController;
+use App\Modules\Rol\Controllers\RolController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])
@@ -16,10 +16,13 @@ Route::middleware(['auth:sanctum'])
         Route::post('/', [RolController::class, 'store'])
             ->middleware('permiso:Roles,Listado,Crear');
 
-        Route::put('/{rol}', [RolController::class, 'update'])
+        Route::put('/{rol}',   [RolController::class, 'update'])
             ->middleware('permiso:Roles,Detalle,Editar');
         Route::patch('/{rol}', [RolController::class, 'update'])
             ->middleware('permiso:Roles,Detalle,Editar');
+
+        Route::put('/{rol}/permisos', [RolController::class, 'syncPermisos'])
+            ->middleware('permiso:Roles,Permisos,Editar');
 
         Route::delete('/{rol}', [RolController::class, 'destroy'])
             ->middleware('permiso:Roles,Detalle,Eliminar');

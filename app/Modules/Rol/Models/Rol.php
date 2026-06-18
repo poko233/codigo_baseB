@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Modules\Roles\Models;
+namespace App\Modules\Rol\Models;
 
-use App\Modules\Shared\Traits\BelongsToEmpresa;
+use App\Shared\Traits\BelongsToEmpresa;
 use Illuminate\Database\Eloquent\Model;
 
 class Rol extends Model
 {
     use BelongsToEmpresa;
 
-    protected $table = 'roles';
+    protected $table  = 'roles';
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -20,31 +20,34 @@ class Rol extends Model
     {
         return $this->belongsTo(
             \App\Modules\Empresa\Models\Empresa::class,
-            'id_empresa' 
+            'id_empresa'
         );
     }
+
     public function users()
     {
         return $this->belongsToMany(
             \App\Modules\Auth\Models\User::class,
-            'user_rol',   
-            'id_rol',     
-            'id_user'     
+            'user_rol',
+            'id_rol',
+            'id_user'
         );
     }
+
     public function modulos()
     {
         return $this->belongsToMany(
-            \App\Modules\Modulos\Models\Modulo::class,
-            'modulo_rol',  
+            \App\Modules\Modulo\Models\Modulo::class,
+            'modulo_rol',
             'id_rol',
             'id_modulo'
         );
     }
+
     public function permisos()
     {
         return $this->hasMany(
-            \App\Modules\Permisos\Models\FormularioPermiso::class,
+            \App\Modules\Rol\Models\FormularioPermiso::class,
             'id_rol'
         );
     }

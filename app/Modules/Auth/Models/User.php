@@ -10,7 +10,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $table = 'users';
+    protected $table = 'user';
 
     protected $fillable = [
         'usuario',
@@ -32,26 +32,22 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'codigo_qr', 'verificacion'];
 
-    /**
-     * Empresas a las que pertenece el usuario.
-     */
-    public function empresas()
+    // ✅ Carpeta real: app/Modules/Empresa → App\Modules\Empresa
+    public function empresa()
     {
         return $this->belongsToMany(
-            \App\Modules\Empresa\Models\Empresa::class,  // corregido
+            \App\Modules\Empresa\Models\Empresa::class,
             'user_empresa',
             'id_user',
             'id_empresa'
         );
     }
 
-    /**
-     * Roles asignados al usuario (sin filtro de empresa; el servicio filtra por empresa).
-     */
-    public function roles()
+    // ✅ Carpeta real: app/Modules/Rol → App\Modules\Rol
+    public function rol()
     {
         return $this->belongsToMany(
-            \App\Modules\Rol\Models\Rol::class,          // corregido
+            \App\Modules\Rol\Models\Rol::class,
             'user_rol',
             'id_user',
             'id_rol'

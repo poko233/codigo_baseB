@@ -49,9 +49,6 @@ class EmpresaResource extends JsonResource
             'dominio'              => $this->dominio,
             'smtp_correo'          => $this->smtp_correo,
             'correo_institucional' => $this->correo_institucional,
-            // pwd_institucional nunca sale en la respuesta
-            'created_at'           => $this->created_at?->toDateTimeString(),
-            'updated_at'           => $this->updated_at?->toDateTimeString(),
         ];
     }
 }

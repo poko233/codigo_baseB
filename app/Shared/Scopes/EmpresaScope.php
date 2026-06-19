@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class EmpresaScope implements Scope
 {
-   
     public function apply(Builder $builder, Model $model): void
     {
         $idEmpresa = $this->resolveEmpresaId();
@@ -27,10 +26,10 @@ class EmpresaScope implements Scope
         }
 
         $user = Auth::user();
-        if ($user && method_exists($user, 'empresas')) {
-            $empresa = $user->relationLoaded('empresas')
-                ? $user->empresas->first()
-                : $user->empresas()->first();
+        if ($user && method_exists($user, 'empresa')) {
+            $empresa = $user->relationLoaded('empresa')
+                ? $user->empresa->first()
+                : $user->empresa()->first();
 
             return $empresa?->id;
         }

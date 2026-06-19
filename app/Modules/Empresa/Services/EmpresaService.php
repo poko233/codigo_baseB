@@ -2,7 +2,7 @@
 
 namespace App\Modules\Empresa\Services;
 
-use App\Modules\Empresas\Models\Empresa;
+use App\Modules\Empresa\Models\Empresa;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class EmpresaService
@@ -32,13 +32,6 @@ class EmpresaService
 
     public function eliminar(Empresa $empresa): void
     {
-        // Soft-check: no elimina si tiene usuarios activos
-        $tieneUsuarios = $empresa->users()->exists() ?? false;
-
-        if ($tieneUsuarios) {
-            abort(422, 'No se puede eliminar una empresa con usuarios asignados.');
-        }
-
         $empresa->delete();
     }
 }

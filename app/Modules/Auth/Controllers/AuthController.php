@@ -45,21 +45,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        $user = $request->user();
-        $empresaId = $request->header('X-Empresa-Id');
-
-        $user->load([
-            'empresas',
-            'roles' => function ($query) use ($empresaId) {
-                if ($empresaId) {
-                    $query->where('roles.id_empresa', (int) $empresaId);
-                }
-            },
-        ]);
-
-        return response()->json([
-            'data' => new UserResource($user),
-            'message' => 'Success',
-        ]);
+        return response()->json($request->user()->load(['empresas', 'roles']));
     }
 }

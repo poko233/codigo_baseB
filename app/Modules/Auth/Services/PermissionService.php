@@ -10,24 +10,17 @@ class PermissionService
     public function userHasPermission(User $user, string $modulo, string $formulario, string $accion, int $idEmpresa): bool
     {
         return DB::table('user_rol')
-            ->join('roles', 'roles.id', '=', 'user_rol.id_rol')
-            ->join('modulo_rol', 'modulo_rol.id_rol', '=', 'roles.id')
-            ->join('modulos', function ($join) use ($idEmpresa) {
-                $join->on('modulos.id', '=', 'modulo_rol.id_modulo')
-                    ->where('modulos.id_empresa', $idEmpresa);
-            })
-            ->join('formulario_permiso', 'formulario_permiso.id_rol', '=', 'roles.id')
-            ->join('formularios', function ($join) use ($idEmpresa) {
-                $join->on('formularios.id', '=', 'formulario_permiso.id_formulario')
-                    ->where('formularios.id_empresa', $idEmpresa);
-            })
-            ->join('acciones', 'acciones.id', '=', 'formulario_permiso.id_accion')
+            ->join('rol', 'rol.id', '=', 'user_rol.id_rol')
+            ->join('formulario_permiso', 'formulario_permiso.id_rol', '=', 'rol.id')
+            ->join('modulo', 'modulo.id', '=', 'formulario_permiso.id_modulo')
+            ->join('formulario', 'formulario.id', '=', 'formulario_permiso.id_formulario')
+            ->join('accion', 'accion.id', '=', 'formulario_permiso.id_accion')
             ->where('user_rol.id_user', $user->id)
-            ->where('roles.id_empresa', $idEmpresa)
-            ->where('roles.estado', 'Activo')
-            ->where('modulos.modulo', $modulo)
-            ->where('formularios.formulario', $formulario)
-            ->where('acciones.accion', $accion)
+            ->where('rol.id_empresa', $idEmpresa)
+            ->where('rol.estado', 'Activo')
+            ->where('modulo.modulo', $modulo)
+            ->where('formulario.formulario', $formulario)
+            ->where('accion.accion', $accion)
             ->exists();
     }
 }

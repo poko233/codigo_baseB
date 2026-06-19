@@ -34,7 +34,7 @@ class AuthService
         }
 
         return [
-            'user' => $user->load(['empresas', 'roles']),
+            'user' => $user->load(['empresa', 'rol']),
             'token' => $user->createToken('api-token')->plainTextToken,
             'empresa_id' => $empresa->id,
             'empresa_nombre' => $empresa->empresa,

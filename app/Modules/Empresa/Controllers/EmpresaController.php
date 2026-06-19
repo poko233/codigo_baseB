@@ -19,6 +19,7 @@ class EmpresaController extends Controller
         $empresas = $this->service->listar($request->only(['estado', 'buscar', 'por_pagina']));
         return EmpresaResource::collection($empresas);
     }
+
     public function show(Empresa $empresa)
     {
         return new EmpresaResource($empresa);

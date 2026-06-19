@@ -29,13 +29,37 @@ class UserProfileResource extends JsonResource
             'fecha_nac' => $this->fecha_nac,
             'foto' => $this->foto,
 
-            // QR (se envía tal cual, en base64)
+            // QR (base64)
             'codigo_qr' => $this->codigo_qr,
 
-            // Relaciones (solo cuando están cargadas)
-            'empresas' => $this->whenLoaded('empresas'),
-            'roles' => $this->whenLoaded('roles'),
-            'sucursales' => $this->whenLoaded('sucursales'),
+            // Empresas con sucursales anidadas
+            'empresas' => $this->whenLoaded('empresas', function () {
+                return $this->empresas->map(function ($empresa) {
+                    $sucursales = $empresa->relationLoaded('sucursales')
+                        ? $empresa->sucursales->map(fn($s) => [
+                            'id' => $s->id,
+                            'sucursal' => $s->sucursal,
+                            'estado' => $s->estado,
+                        ])->values()
+                        : [];
+
+                    return [
+                        'id' => $empresa->id,
+                        'empresa' => $empresa->empresa,
+                        'sucursales' => $sucursales,
+                    ];
+                });
+            }),
+
+            // Roles (filtrados por empresa activa)
+            'roles' => $this->whenLoaded('roles', function () {
+                return $this->roles->map(fn($rol) => [
+                    'id' => $rol->id,
+                    'rol' => $rol->rol,
+                    'id_empresa' => $rol->id_empresa,
+                    'estado' => $rol->estado,
+                ]);
+            }),
         ];
     }
 }

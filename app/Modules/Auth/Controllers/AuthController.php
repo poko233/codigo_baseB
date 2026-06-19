@@ -47,6 +47,7 @@ class AuthController extends Controller
         $user = $request->user();
         $empresaId = $request->header('X-Empresa-Id');
 
+        // Cargar empresas (solo id y nombre)
         $user->load([
             'empresas' => function ($query) {
                 $query->select('empresa.id', 'empresa.empresa');
@@ -57,13 +58,25 @@ class AuthController extends Controller
                 }
                 $query->select('rol.id', 'rol.rol', 'rol.id_empresa', 'rol.estado');
             },
-            'sucursales' => function ($query) use ($empresaId) {
-                if ($empresaId) {
-                    $query->where('sucursal.id_empresa', (int) $empresaId);
-                }
-                $query->select('sucursal.id', 'sucursal.sucursal', 'sucursal.id_empresa', 'sucursal.estado');
-            },
         ]);
+
+        // Obtener todas las sucursales del usuario (sin filtrar por empresa activa)
+        $sucursales = \App\Modules\Sucursal\Models\Sucursal::select(
+            'sucursal.id',
+            'sucursal.sucursal',
+            'sucursal.id_empresa',
+            'sucursal.estado'
+        )
+            ->join('user_sucursal', 'user_sucursal.id_sucursal', '=', 'sucursal.id')
+            ->where('user_sucursal.id_user', $user->id)
+            ->get()
+            ->groupBy('id_empresa');
+
+        // Anidar sucursales dentro de cada empresa
+        foreach ($user->empresas as $empresa) {
+            $empresaSucursales = $sucursales->get($empresa->id, collect([]));
+            $empresa->setRelation('sucursales', $empresaSucursales);
+        }
 
         return response()->json([
             'data' => new UserProfileResource($user),

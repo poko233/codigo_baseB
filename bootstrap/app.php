@@ -16,14 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //     'rol'  => \App\Http\Middleware\TieneRol::class,
         //     'role' => \App\Http\Middleware\CheckRolNombre::class,
         // ]);
-        $middleware->alias(['permiso' => \App\Auth\Middleware\CheckPermission::class]);
+        $middleware->alias(['permiso' => \App\Modules\Auth\Middleware\CheckPermission::class]);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (
-            \Illuminate\Auth\AuthenticationException $e,
-            \Illuminate\Http\Request $request
-        ) {
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
             return response()->json([
                 'message' => 'No autenticado'
             ], 401);

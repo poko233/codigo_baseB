@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Empresa\Models;
+namespace App\Modules\Empresa\Models;
 
 use App\Modules\Auth\Models\User;
 use App\Modules\Rol\Models\Rol;
@@ -16,7 +16,7 @@ class Empresa extends Model
 
     protected $casts = [
         'tipo_cambio' => 'decimal:2',
-        'estado'      => 'string',
+        'estado' => 'string',
     ];
 
 

@@ -17,9 +17,9 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'estado' => $this->estado,
             'foto' => $this->foto,
-            // Relaciones solo si están cargadas
             'empresas' => $this->whenLoaded('empresas'),
             'roles' => $this->whenLoaded('roles'),
+            'sucursales' => $this->whenLoaded('sucursales'), // por si se cargan
         ];
     }
 }

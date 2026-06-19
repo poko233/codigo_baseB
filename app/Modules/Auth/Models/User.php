@@ -10,7 +10,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $table = 'user';
+    protected $table = 'user';    // ← tabla en singular
 
     protected $fillable = [
         'usuario',
@@ -28,12 +28,13 @@ class User extends Authenticatable
         'expedido',
         'foto',
         'estado',
+        'codigo_qr',
+        'verificacion',
     ];
 
-    protected $hidden = ['password', 'codigo_qr', 'verificacion'];
+    protected $hidden = ['password'];
 
-    // ✅ Carpeta real: app/Modules/Empresa → App\Modules\Empresa
-    public function empresa()
+    public function empresas()
     {
         return $this->belongsToMany(
             \App\Modules\Empresa\Models\Empresa::class,
@@ -43,14 +44,23 @@ class User extends Authenticatable
         );
     }
 
-    // ✅ Carpeta real: app/Modules/Rol → App\Modules\Rol
-    public function rol()
+    public function roles()
     {
         return $this->belongsToMany(
             \App\Modules\Rol\Models\Rol::class,
             'user_rol',
             'id_user',
             'id_rol'
+        );
+    }
+
+    public function sucursales()
+    {
+        return $this->belongsToMany(
+            \App\Modules\Sucursal\Models\Sucursal::class, // Asegúrate de tener este modelo
+            'user_sucursal',
+            'id_user',
+            'id_sucursal'
         );
     }
 }

@@ -13,15 +13,14 @@ class Empresa extends Model
 {
     protected $table = 'empresa';
     protected $guarded = ['id'];
-    public $timestamps = false; 
+    public $timestamps = false; // La tabla empresa no tiene created_at/updated_at
 
     protected $casts = [
         'tipo_cambio' => 'decimal:2',
         'estado' => 'string',
     ];
 
-
-    public function user()
+    public function users()
     {
         return $this->belongsToMany(
             User::class,
@@ -31,7 +30,7 @@ class Empresa extends Model
         );
     }
 
-    public function rol()
+    public function roles()
     {
         return $this->hasMany(Rol::class, 'id_empresa');
     }

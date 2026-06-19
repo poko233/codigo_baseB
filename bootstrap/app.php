@@ -16,7 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         //     'rol'  => \App\Http\Middleware\TieneRol::class,
         //     'role' => \App\Http\Middleware\CheckRolNombre::class,
         // ]);
-        $middleware->alias(['permiso' => \App\Modules\Auth\Middleware\CheckPermission::class]);
+        $middleware->alias([
+            'permiso' => \App\Modules\Auth\Middleware\CheckPermission::class,
+            'sucursal' => \App\Modules\Auth\Middleware\CheckSucursal::class,
+        ]);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -8,6 +8,11 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
+    /**
+     * Intenta autenticar al usuario en una empresa concreta.
+     *
+     * @return array{token: string, empresa_id: int, empresa_nombre: string}
+     */
     public function attemptLogin(string $usuario, string $password, string $nombreEmpresa): array
     {
         $user = User::where('usuario', $usuario)->first();
@@ -24,8 +29,7 @@ class AuthService
             ]);
         }
 
-        // Buscar empresa por nombre entre las empresas del usuario
-        $empresa = $user->empresas()->where('empresa', $nombreEmpresa)->first();
+        $empresa = $user->empresas()->where('empresa.empresa', $nombreEmpresa)->first();
 
         if (!$empresa) {
             throw ValidationException::withMessages([
@@ -34,7 +38,6 @@ class AuthService
         }
 
         return [
-            'user' => $user->load(['empresa', 'rol']),
             'token' => $user->createToken('api-token')->plainTextToken,
             'empresa_id' => $empresa->id,
             'empresa_nombre' => $empresa->empresa,

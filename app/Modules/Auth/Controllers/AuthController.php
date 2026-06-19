@@ -3,7 +3,7 @@
 namespace App\Modules\Auth\Controllers;
 
 use App\Modules\Auth\Requests\LoginRequest;
-use App\Modules\Auth\Resources\UserResource;
+use App\Modules\Auth\Resources\UserProfileResource;
 use App\Modules\Auth\Services\AuthService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -24,7 +24,6 @@ class AuthController extends Controller
         );
 
         return response()->json([
-            'data' => new UserResource($result['user']),
             'token' => $result['token'],
             'empresa' => [
                 'id' => $result['empresa_id'],
@@ -45,6 +44,30 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user()->load(['empresas', 'roles']));
+        $user = $request->user();
+        $empresaId = $request->header('X-Empresa-Id');
+
+        $user->load([
+            'empresas' => function ($query) {
+                $query->select('empresa.id', 'empresa.empresa');
+            },
+            'roles' => function ($query) use ($empresaId) {
+                if ($empresaId) {
+                    $query->where('rol.id_empresa', (int) $empresaId);
+                }
+                $query->select('rol.id', 'rol.rol', 'rol.id_empresa', 'rol.estado');
+            },
+            'sucursales' => function ($query) use ($empresaId) {
+                if ($empresaId) {
+                    $query->where('sucursal.id_empresa', (int) $empresaId);
+                }
+                $query->select('sucursal.id', 'sucursal.sucursal', 'sucursal.id_empresa', 'sucursal.estado');
+            },
+        ]);
+
+        return response()->json([
+            'data' => new UserProfileResource($user),
+            'message' => 'Success',
+        ]);
     }
 }

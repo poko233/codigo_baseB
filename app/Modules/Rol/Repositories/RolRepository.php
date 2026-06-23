@@ -112,4 +112,20 @@ class RolRepository
     {
         $rol->delete();
     }
+
+    public function todosConPermisos(int $idEmpresa): \Illuminate\Support\Collection
+    {
+        return Rol::where('id_empresa', $idEmpresa)
+            ->with([
+                'permisos' => function ($query) {
+                    $query->whereHas('modulo',     fn($q) => $q->where('estado', 'Activo'))
+                        ->whereHas('formulario', fn($q) => $q->where('estado', 'Activo'));
+                },
+                'permisos.modulo',
+                'permisos.formulario',
+                'permisos.accion',
+            ])
+            ->orderBy('rol')
+            ->get();
+    }
 }

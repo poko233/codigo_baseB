@@ -64,4 +64,11 @@ class RolController extends Controller
         $this->service->eliminar($rol);
         return response()->json(['message' => 'Rol eliminado correctamente.']);
     }
+
+    public function todosConPermisos(Request $request)
+    {
+        $idEmpresa = (int) $request->header('X-Empresa-Id');
+        $roles = $this->service->listarConPermisos($idEmpresa);
+        return RolResource::collection($roles);
+    }
 }

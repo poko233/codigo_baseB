@@ -38,7 +38,7 @@ class RolService
     {
         unset($datos['id_empresa']);
         $actualizado = $this->repo->actualizar($rol, $datos);
-        // Cualquier cambio en el rol (especialmente estado) afecta permisos cacheados.
+         $this->permissionService->forgetTodosRolesPermisos($rol->id_empresa); 
         $this->permissionService->forgetPermisosDeRol($rol->id);
         return $actualizado;
     }
@@ -47,6 +47,7 @@ class RolService
     {
         $this->repo->sincronizarPermisos($rol, $permisos);
         $this->permissionService->forgetPermisosDeRol($rol->id);
+        $this->permissionService->forgetTodosRolesPermisos($rol->id_empresa);
         return $this->repo->conPermisos($rol);
     }
 
@@ -56,6 +57,25 @@ class RolService
             abort(422, 'No se puede eliminar un rol que tiene usuarios asignados.');
         }
         $this->permissionService->forgetPermisosDeRol($rol->id);
+        $this->permissionService->forgetTodosRolesPermisos($rol->id_empresa); 
         $this->repo->eliminar($rol);
     }
+
+    public function listarConPermisos(int $idEmpresa): \Illuminate\Support\Collection
+    {
+        // 1. Intenta caché primero
+        $cached = $this->permissionService->getTodosRolesPermisos($idEmpresa);
+        if ($cached !== null) {
+            return $cached;   // ← 0 queries, respuesta instantánea
+        }
+
+        // 2. No hay caché → consulta BD
+        $roles = $this->repo->todosConPermisos($idEmpresa);
+
+        // 3. Guarda en caché para próximas llamadas
+        $this->permissionService->setTodosRolesPermisos($idEmpresa, $roles);
+
+        return $roles;
+    }
 }
+

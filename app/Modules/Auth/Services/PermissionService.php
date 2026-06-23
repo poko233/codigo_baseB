@@ -132,4 +132,28 @@ class PermissionService
 
         return array_values($sidebar);
     }
+
+    private function keyTodosRoles(int $idEmpresa): string
+    {
+        return "todos_roles_permisos:empresa:{$idEmpresa}";
+    }
+
+    public function getTodosRolesPermisos(int $idEmpresa): mixed
+    {
+        return \Illuminate\Support\Facades\Cache::get($this->keyTodosRoles($idEmpresa));
+    }
+
+    public function setTodosRolesPermisos(int $idEmpresa, mixed $data): void
+    {
+        \Illuminate\Support\Facades\Cache::put(
+            $this->keyTodosRoles($idEmpresa),
+            $data,
+            now()->addHour()   // TTL: 1 hora
+        );
+    }
+
+    public function forgetTodosRolesPermisos(int $idEmpresa): void
+    {
+        \Illuminate\Support\Facades\Cache::forget($this->keyTodosRoles($idEmpresa));
+    }
 }

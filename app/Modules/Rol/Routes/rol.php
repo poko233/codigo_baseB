@@ -13,14 +13,22 @@ Route::middleware(['auth:sanctum', 'sucursal'])
         Route::post('/', [RolController::class, 'store'])
             ->middleware('permiso:Configuracion,Roles,Crear');
 
+        Route::get('/permisos', [RolController::class, 'todosConPermisos'])
+            ->middleware('permiso:Configuracion,Roles,Ver');
+
         Route::get('/{rol}', [RolController::class, 'show'])
             ->middleware('permiso:Configuracion,Roles,Ver');
+
+        
 
         Route::put('/{rol}', [RolController::class, 'update'])
             ->middleware('permiso:Configuracion,Roles,Editar');
 
         Route::delete('/{rol}', [RolController::class, 'destroy'])
             ->middleware('permiso:Configuracion,Roles,Eliminar');
+
+        
+
 
         Route::get('/{rol}/permisos', [RolController::class, 'getPermisos'])
             ->middleware('permiso:Configuracion,Roles,Ver');

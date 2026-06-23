@@ -66,4 +66,13 @@ class PermisoService
             ->where('id', $idPermiso)
             ->delete();
     }
+
+    public function removeByParams(int $idRol, int $idFormulario, int $idAccion, int $idEmpresa): int
+    {
+        return FormularioPermiso::byEmpresa($idEmpresa)
+            ->where('id_rol', $idRol)
+            ->where('id_formulario', $idFormulario)
+            ->where('id_accion', $idAccion)
+            ->delete();
+    }
 }

@@ -61,19 +61,16 @@ class RolService
         $this->repo->eliminar($rol);
     }
 
-    public function listarConPermisos(int $idEmpresa): \Illuminate\Support\Collection
+   public function listarConPermisos(int $idEmpresa): \Illuminate\Support\Collection
     {
-        // 1. Intenta caché primero
         $cached = $this->permissionService->getTodosRolesPermisos($idEmpresa);
         if ($cached !== null) {
-            return $cached;   // ← 0 queries, respuesta instantánea
+            return collect($cached);
         }
 
-        // 2. No hay caché → consulta BD
         $roles = $this->repo->todosConPermisos($idEmpresa);
 
-        // 3. Guarda en caché para próximas llamadas
-        $this->permissionService->setTodosRolesPermisos($idEmpresa, $roles);
+        $this->permissionService->setTodosRolesPermisos($idEmpresa, $roles->toArray());
 
         return $roles;
     }

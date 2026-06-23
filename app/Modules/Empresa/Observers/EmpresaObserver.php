@@ -11,7 +11,7 @@ class EmpresaObserver
     {
         $rolesDefault = [
             [
-                'rol'         => 'admin',
+                'rol'         => 'administrador',
                 'descripcion' => 'Acceso total al sistema.',
                 'estado'      => 'Activo',
             ],

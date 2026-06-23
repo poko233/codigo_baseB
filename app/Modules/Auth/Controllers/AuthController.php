@@ -2,17 +2,19 @@
 
 namespace App\Modules\Auth\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Modules\Auth\Requests\LoginRequest;
 use App\Modules\Auth\Resources\UserProfileResource;
 use App\Modules\Auth\Services\AuthService;
-use App\Http\Controllers\Controller;
+use App\Modules\Auth\Services\PermissionService;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function __construct(private AuthService $authService)
-    {
-    }
+    public function __construct(
+        private AuthService $authService,
+        private PermissionService $permissionService
+    ) {}
 
     public function login(LoginRequest $request)
     {
@@ -24,9 +26,9 @@ class AuthController extends Controller
         );
 
         return response()->json([
-            'token' => $result['token'],
+            'token'   => $result['token'],
             'empresa' => [
-                'id' => $result['empresa_id'],
+                'id'     => $result['empresa_id'],
                 'nombre' => $result['empresa_nombre'],
             ],
             'message' => 'Inicio de sesión exitoso',
@@ -36,10 +38,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $this->authService->logout($request->user());
-
-        return response()->json([
-            'message' => 'Sesión cerrada correctamente',
-        ]);
+        return response()->json(['message' => 'Sesión cerrada correctamente.']);
     }
 
     public function me(Request $request)
@@ -79,8 +78,28 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'data' => new UserProfileResource($user),
+            'data'    => new UserProfileResource($user),
             'message' => 'Success',
+        ]);
+    }
+
+    public function mePermisos(Request $request)
+    {
+        $user      = $request->user();
+        $idEmpresa = (int) $request->header('X-Empresa-Id');
+
+        return response()->json([
+            'data' => $this->permissionService->getPermisos($user, $idEmpresa),
+        ]);
+    }
+
+    public function sidebar(Request $request)
+    {
+        $user      = $request->user();
+        $idEmpresa = (int) $request->header('X-Empresa-Id');
+
+        return response()->json([
+            'data' => $this->permissionService->getSidebar($user, $idEmpresa),
         ]);
     }
 }

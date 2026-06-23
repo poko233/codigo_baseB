@@ -9,7 +9,7 @@ class Rol extends Model
 {
     use BelongsToEmpresa;
 
-    protected $table  = 'rol';
+    protected $table   = 'rol';
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -24,7 +24,7 @@ class Rol extends Model
         );
     }
 
-    public function user()
+    public function usuarios()
     {
         return $this->belongsToMany(
             \App\Modules\Auth\Models\User::class,
@@ -47,7 +47,7 @@ class Rol extends Model
     public function permisos()
     {
         return $this->hasMany(
-            \App\Modules\Rol\Models\FormularioPermiso::class,
+            \App\Modules\Permiso\Models\FormularioPermiso::class,
             'id_rol'
         );
     }

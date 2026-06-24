@@ -14,16 +14,12 @@ class ModuloRequest extends FormRequest
 
     public function rules(): array
     {
-        $idEmpresa = (int) $this->header('X-Empresa-Id');
-
         return [
             'modulo' => [
                 'required',
                 'string',
                 'max:40',
-                Rule::unique('modulo')
-                    ->where('id_empresa', $idEmpresa)
-                    ->ignore($this->route('modulo')),
+                Rule::unique('modulo')->ignore($this->route('modulo')),
             ],
             'descripcion'   => 'nullable|string',
             'icono'         => 'nullable|string',
@@ -37,7 +33,7 @@ class ModuloRequest extends FormRequest
     {
         return [
             'modulo.required' => 'El nombre del módulo es obligatorio.',
-            'modulo.unique'   => 'Ya existe un módulo con este nombre en la empresa.',
+            'modulo.unique'   => 'Ya existe un módulo con este nombre.',
             'estado.in'       => 'El estado debe ser Activo o Inactivo.',
         ];
     }

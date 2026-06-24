@@ -7,23 +7,30 @@ use Illuminate\Support\Facades\DB;
 
 class PermissionService
 {
-    private const TTL = 3600;
+    private const TTL = 600; // 10 minutos
 
-    private function cacheKey(int $idUser, int $idEmpresa): string
+    private function cacheKey(int $idUser): string
     {
-        return "permisos:user:{$idUser}:empresa:{$idEmpresa}";
+        return "permisos:user:{$idUser}";
     }
 
-    public function getPermisos($user, int $idEmpresa): array
+    private function sidebarKey(int $idRol): string
+    {
+        return "sidebar_rol_{$idRol}";
+    }
+
+    // ─── Permisos planos (para CheckPermission middleware) ────────────────────
+
+    public function getPermisos($user): array
     {
         return Cache::remember(
-            $this->cacheKey($user->id, $idEmpresa),
+            $this->cacheKey($user->id),
             self::TTL,
-            fn () => $this->buildMapa($user->id, $idEmpresa)
+            fn () => $this->buildMapa($user->id)
         );
     }
 
-    private function buildMapa(int $idUser, int $idEmpresa): array
+    private function buildMapa(int $idUser): array
     {
         $rows = DB::table('user_rol')
             ->join('rol', 'rol.id', '=', 'user_rol.id_rol')
@@ -32,7 +39,6 @@ class PermissionService
             ->join('formulario', 'formulario.id', '=', 'formulario_permiso.id_formulario')
             ->join('accion', 'accion.id', '=', 'formulario_permiso.id_accion')
             ->where('user_rol.id_user', $idUser)
-            ->where('rol.id_empresa', $idEmpresa)
             ->where('rol.estado', 'Activo')
             ->select('modulo.modulo', 'formulario.formulario', 'accion.accion')
             ->get();
@@ -50,110 +56,122 @@ class PermissionService
         return $mapa;
     }
 
-    public function userHasPermission($user, string $modulo, string $formulario, string $accion, int $idEmpresa): bool
+    public function userHasPermission($user, string $modulo, string $formulario, string $accion): bool
     {
-        $mapa = $this->getPermisos($user, $idEmpresa);
+        $mapa = $this->getPermisos($user);
 
         return isset($mapa[$modulo][$formulario])
             && in_array($accion, $mapa[$modulo][$formulario], true);
     }
 
-    public function forgetPermisos(int $idUser, int $idEmpresa): void
+    // ─── Invalidación de caché ────────────────────────────────────────────────
+
+    public function forgetPermisos(int $idUser): void
     {
-        Cache::forget($this->cacheKey($idUser, $idEmpresa));
+        Cache::forget($this->cacheKey($idUser));
     }
 
     public function forgetPermisosDeRol(int $idRol): void
     {
         $usuarios = DB::table('user_rol')
-            ->join('rol', 'rol.id', '=', 'user_rol.id_rol')
-            ->where('user_rol.id_rol', $idRol)
-            ->select('user_rol.id_user', 'rol.id_empresa')
-            ->get();
+            ->where('id_rol', $idRol)
+            ->pluck('id_user');
 
-        foreach ($usuarios as $u) {
-            Cache::forget($this->cacheKey($u->id_user, $u->id_empresa));
+        foreach ($usuarios as $idUser) {
+            Cache::forget($this->cacheKey($idUser));
         }
+
+        Cache::forget($this->sidebarKey($idRol));
     }
 
-    public function getSidebar($user, int $idEmpresa): array
-    {
-        $mapa = $this->getPermisos($user, $idEmpresa);
+    // ─── Sidebar ──────────────────────────────────────────────────────────────
 
-        $accesos = [];
-        foreach ($mapa as $moduloNombre => $formularios) {
-            foreach ($formularios as $formularioNombre => $acciones) {
-                if (in_array('Ver', $acciones, true)) {
-                    $accesos[$moduloNombre][] = $formularioNombre;
+    public function getSidebar($user): array
+    {
+        $roles = DB::table('user_rol')
+            ->join('rol', 'rol.id', '=', 'user_rol.id_rol')
+            ->where('user_rol.id_user', $user->id)
+            ->where('rol.estado', 'Activo')
+            ->pluck('rol.id');
+
+        $merged = [];
+
+        foreach ($roles as $idRol) {
+            $rolSidebar = Cache::remember(
+                $this->sidebarKey($idRol),
+                self::TTL,
+                fn () => $this->buildSidebarParaRol($idRol)
+            );
+
+            foreach ($rolSidebar as $idModulo => $modulo) {
+                if (!isset($merged[$idModulo])) {
+                    $merged[$idModulo] = $modulo;
+                } else {
+                    foreach ($modulo['formularios'] as $idFormulario => $formulario) {
+                        if (!isset($merged[$idModulo]['formularios'][$idFormulario])) {
+                            $merged[$idModulo]['formularios'][$idFormulario] = $formulario;
+                        } else {
+                            $merged[$idModulo]['formularios'][$idFormulario]['acciones'] = array_values(
+                                array_unique(array_merge(
+                                    $merged[$idModulo]['formularios'][$idFormulario]['acciones'],
+                                    $formulario['acciones']
+                                ))
+                            );
+                        }
+                    }
                 }
             }
         }
 
-        if (empty($accesos)) {
-            return [];
-        }
+        return array_values(array_map(function ($modulo) {
+            $modulo['formularios'] = array_values($modulo['formularios']);
+            return $modulo;
+        }, $merged));
+    }
 
-        $rows = DB::table('modulo')
-            ->join('formulario_modulo', 'formulario_modulo.id_modulo', '=', 'modulo.id')
-            ->join('formulario', 'formulario.id', '=', 'formulario_modulo.id_formulario')
-            ->where('modulo.id_empresa', $idEmpresa)
+    private function buildSidebarParaRol(int $idRol): array
+    {
+        $rows = DB::table('formulario_permiso')
+            ->join('modulo', 'modulo.id', '=', 'formulario_permiso.id_modulo')
+            ->join('formulario', 'formulario.id', '=', 'formulario_permiso.id_formulario')
+            ->join('accion', 'accion.id', '=', 'formulario_permiso.id_accion')
+            ->where('formulario_permiso.id_rol', $idRol)
             ->where('modulo.estado', 'Activo')
             ->where('formulario.estado', 'Activo')
-            ->whereIn('modulo.modulo', array_keys($accesos))
             ->select(
                 'modulo.id as id_modulo',
                 'modulo.modulo',
                 'modulo.icono',
                 'formulario.id as id_formulario',
                 'formulario.formulario',
-                'formulario.ruta'
+                'formulario.ruta',
+                'accion.accion'
             )
             ->get();
 
         $sidebar = [];
         foreach ($rows as $row) {
-            if (!in_array($row->formulario, $accesos[$row->modulo] ?? [], true)) {
-                continue;
-            }
             if (!isset($sidebar[$row->id_modulo])) {
                 $sidebar[$row->id_modulo] = [
-                    'id'          => $row->id_modulo,
-                    'modulo'      => $row->modulo,
-                    'icono'       => $row->icono,
+                    'id'         => $row->id_modulo,
+                    'nombre'     => $row->modulo,
+                    'icono'      => $row->icono,
                     'formularios' => [],
                 ];
             }
-            $sidebar[$row->id_modulo]['formularios'][] = [
-                'id'         => $row->id_formulario,
-                'formulario' => $row->formulario,
-                'ruta'       => $row->ruta,
-            ];
+            if (!isset($sidebar[$row->id_modulo]['formularios'][$row->id_formulario])) {
+                $sidebar[$row->id_modulo]['formularios'][$row->id_formulario] = [
+                    'id'      => $row->id_formulario,
+                    'nombre'  => $row->formulario,
+                    'ruta'    => $row->ruta,
+                    'acciones' => [],
+                ];
+            }
+            if (!in_array($row->accion, $sidebar[$row->id_modulo]['formularios'][$row->id_formulario]['acciones'], true)) {
+                $sidebar[$row->id_modulo]['formularios'][$row->id_formulario]['acciones'][] = $row->accion;
+            }
         }
 
-        return array_values($sidebar);
-    }
-
-    private function keyTodosRoles(int $idEmpresa): string
-    {
-        return "todos_roles_permisos:empresa:{$idEmpresa}";
-    }
-
-    public function getTodosRolesPermisos(int $idEmpresa): mixed
-    {
-        return \Illuminate\Support\Facades\Cache::get($this->keyTodosRoles($idEmpresa));
-    }
-
-    public function setTodosRolesPermisos(int $idEmpresa, mixed $data): void
-    {
-        \Illuminate\Support\Facades\Cache::put(
-            $this->keyTodosRoles($idEmpresa),
-            $data,
-            now()->addHour()   // TTL: 1 hora
-        );
-    }
-
-    public function forgetTodosRolesPermisos(int $idEmpresa): void
-    {
-        \Illuminate\Support\Facades\Cache::forget($this->keyTodosRoles($idEmpresa));
+        return $sidebar;
     }
 }

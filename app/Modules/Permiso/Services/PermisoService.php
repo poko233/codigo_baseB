@@ -8,69 +8,59 @@ use Illuminate\Support\Facades\DB;
 
 class PermisoService
 {
-    public function getPermisosByRol(int $idRol, int $idEmpresa)
+    public function getPermisosByRol(int $idRol)
     {
         return FormularioPermiso::with(['modulo', 'formulario', 'accion'])
             ->where('id_rol', $idRol)
-            ->byEmpresa($idEmpresa)
             ->get();
     }
 
-    public function syncPermisos(int $idRol, array $permisos, int $idEmpresa)
+    public function syncPermisos(int $idRol, array $permisos)
     {
-        return DB::transaction(function () use ($idRol, $permisos, $idEmpresa) {
-            // Verificar que el rol pertenece a la empresa
-            $rol = Rol::where('id_empresa', $idEmpresa)->findOrFail($idRol);
+        return DB::transaction(function () use ($idRol, $permisos) {
+            Rol::findOrFail($idRol);
 
-            // Eliminar permisos existentes del rol
             FormularioPermiso::where('id_rol', $idRol)->delete();
 
-            // Crear nuevos permisos
             $permisosData = [];
             foreach ($permisos as $permiso) {
                 $permisosData[] = [
-                    'id_rol' => $idRol,
-                    'id_modulo' => $permiso['id_modulo'],
+                    'id_rol'        => $idRol,
+                    'id_modulo'     => $permiso['id_modulo'],
                     'id_formulario' => $permiso['id_formulario'],
-                    'id_accion' => $permiso['id_accion'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'id_accion'     => $permiso['id_accion'],
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
                 ];
             }
 
-            FormularioPermiso::insert($permisosData);
+            if (!empty($permisosData)) {
+                FormularioPermiso::insert($permisosData);
+            }
 
-            return $this->getPermisosByRol($idRol, $idEmpresa);
+            return $this->getPermisosByRol($idRol);
         });
     }
 
-    public function addPermiso(int $idRol, array $permiso, int $idEmpresa)
+    public function addPermiso(int $idRol, array $permiso)
     {
-        return DB::transaction(function () use ($idRol, $permiso, $idEmpresa) {
-            $rol = Rol::where('id_empresa', $idEmpresa)->findOrFail($idRol);
+        return DB::transaction(function () use ($idRol, $permiso) {
+            Rol::findOrFail($idRol);
 
             $nuevoPermiso = FormularioPermiso::create([
-                'id_rol' => $idRol,
-                'id_modulo' => $permiso['id_modulo'],
+                'id_rol'        => $idRol,
+                'id_modulo'     => $permiso['id_modulo'],
                 'id_formulario' => $permiso['id_formulario'],
-                'id_accion' => $permiso['id_accion'],
+                'id_accion'     => $permiso['id_accion'],
             ]);
 
             return $nuevoPermiso->load(['modulo', 'formulario', 'accion']);
         });
     }
 
-    public function removePermiso(int $idPermiso, int $idEmpresa)
+    public function removeByParams(int $idRol, int $idFormulario, int $idAccion): int
     {
-        return FormularioPermiso::byEmpresa($idEmpresa)
-            ->where('id', $idPermiso)
-            ->delete();
-    }
-
-    public function removeByParams(int $idRol, int $idFormulario, int $idAccion, int $idEmpresa): int
-    {
-        return FormularioPermiso::byEmpresa($idEmpresa)
-            ->where('id_rol', $idRol)
+        return FormularioPermiso::where('id_rol', $idRol)
             ->where('id_formulario', $idFormulario)
             ->where('id_accion', $idAccion)
             ->delete();

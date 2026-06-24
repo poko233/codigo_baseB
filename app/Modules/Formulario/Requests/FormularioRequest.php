@@ -14,16 +14,12 @@ class FormularioRequest extends FormRequest
 
     public function rules(): array
     {
-        $idEmpresa = (int) $this->header('X-Empresa-Id');
-
         return [
             'formulario' => [
                 'required',
                 'string',
                 'max:40',
-                Rule::unique('formulario')
-                    ->where('id_empresa', $idEmpresa)
-                    ->ignore($this->route('formulario')),
+                Rule::unique('formulario')->ignore($this->route('formulario')),
             ],
             'descripcion' => 'nullable|string',
             'ruta'        => 'nullable|string|max:40',
@@ -37,7 +33,7 @@ class FormularioRequest extends FormRequest
     {
         return [
             'formulario.required' => 'El nombre del formulario es obligatorio.',
-            'formulario.unique'   => 'Ya existe un formulario con este nombre en la empresa.',
+            'formulario.unique'   => 'Ya existe un formulario con este nombre.',
             'estado.in'           => 'El estado debe ser Activo o Inactivo.',
         ];
     }

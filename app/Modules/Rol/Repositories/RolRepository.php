@@ -6,13 +6,14 @@ use App\Modules\Formulario\Models\Formulario;
 use App\Modules\Modulo\Models\Modulo;
 use App\Modules\Rol\Models\Rol;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class RolRepository
 {
-    public function paginar(int $idEmpresa, array $filtros): LengthAwarePaginator
+    public function paginar(array $filtros): LengthAwarePaginator
     {
-        $query = Rol::query()->where('id_empresa', $idEmpresa);
+        $query = Rol::query();
 
         if (!empty($filtros['estado'])) {
             $query->where('estado', $filtros['estado']);
@@ -51,45 +52,27 @@ class RolRepository
         return $rol;
     }
 
-    /**
-     * Recibe el array agrupado de permisos y sincroniza.
-     * Formato: [['id_modulo' => 1, 'id_formulario' => 3, 'acciones' => [1, 2]], ...]
-     * Si envías [] quita todos los permisos del rol.
-     * Valida que módulo y formulario pertenezcan a la empresa del rol.
-     */
     public function sincronizarPermisos(Rol $rol, array $permisos): void
     {
         DB::transaction(function () use ($rol, $permisos) {
-            $idEmpresa = $rol->id_empresa;
+            $rol->permisos()->delete();
 
             if (!empty($permisos)) {
                 $idsModulo     = array_unique(array_column($permisos, 'id_modulo'));
                 $idsFormulario = array_unique(array_column($permisos, 'id_formulario'));
 
-                // deEmpresa() bypasses the global scope y aplica un where explícito.
-                $modulosValidos = Modulo::deEmpresa($idEmpresa)
-                    ->whereIn('id', $idsModulo)
-                    ->pluck('id')
-                    ->all();
-
-                $formulariosValidos = Formulario::deEmpresa($idEmpresa)
-                    ->whereIn('id', $idsFormulario)
-                    ->pluck('id')
-                    ->all();
+                $modulosValidos     = Modulo::whereIn('id', $idsModulo)->pluck('id')->all();
+                $formulariosValidos = Formulario::whereIn('id', $idsFormulario)->pluck('id')->all();
 
                 foreach ($permisos as $permiso) {
                     if (!in_array($permiso['id_modulo'], $modulosValidos, true)) {
-                        abort(422, "El módulo {$permiso['id_modulo']} no pertenece a esta empresa.");
+                        abort(422, "El módulo {$permiso['id_modulo']} no existe.");
                     }
                     if (!in_array($permiso['id_formulario'], $formulariosValidos, true)) {
-                        abort(422, "El formulario {$permiso['id_formulario']} no pertenece a esta empresa.");
+                        abort(422, "El formulario {$permiso['id_formulario']} no existe.");
                     }
                 }
-            }
 
-            $rol->permisos()->delete();
-
-            if (!empty($permisos)) {
                 $filas = [];
                 foreach ($permisos as $permiso) {
                     foreach ($permiso['acciones'] as $idAccion) {
@@ -113,19 +96,18 @@ class RolRepository
         $rol->delete();
     }
 
-    public function todosConPermisos(int $idEmpresa): \Illuminate\Support\Collection
+    public function todosConPermisos(): Collection
     {
-        return Rol::where('id_empresa', $idEmpresa)
-            ->with([
-                'permisos' => function ($query) {
-                    $query->whereHas('modulo',     fn($q) => $q->where('estado', 'Activo'))
-                        ->whereHas('formulario', fn($q) => $q->where('estado', 'Activo'));
-                },
-                'permisos.modulo',
-                'permisos.formulario',
-                'permisos.accion',
-            ])
-            ->orderBy('rol')
-            ->get();
+        return Rol::with([
+            'permisos' => function ($query) {
+                $query->whereHas('modulo',     fn ($q) => $q->where('estado', 'Activo'))
+                      ->whereHas('formulario', fn ($q) => $q->where('estado', 'Activo'));
+            },
+            'permisos.modulo',
+            'permisos.formulario',
+            'permisos.accion',
+        ])
+        ->orderBy('rol')
+        ->get();
     }
 }

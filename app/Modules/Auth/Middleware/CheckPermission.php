@@ -8,24 +8,13 @@ use Illuminate\Http\Request;
 
 class CheckPermission
 {
-    public function __construct(private PermissionService $permissions)
-    {
-    }
+    public function __construct(private PermissionService $permissions) {}
 
     public function handle(Request $request, Closure $next, string $modulo, string $formulario, string $accion)
     {
         $user = $request->user();
-        $idEmpresa = $request->header('X-Empresa-Id');
 
-        $perteneceAEmpresa = $user->empresas()
-            ->where('empresa.id', (int) $idEmpresa)
-            ->exists();
-
-        if (!$idEmpresa || !$perteneceAEmpresa) {
-            abort(403, 'No tienes acceso a esta empresa.');
-        }
-
-        if (!$this->permissions->userHasPermission($user, $modulo, $formulario, $accion, (int) $idEmpresa)) {
+        if (!$this->permissions->userHasPermission($user, $modulo, $formulario, $accion)) {
             abort(403, 'No tienes permiso para realizar esta acción.');
         }
 

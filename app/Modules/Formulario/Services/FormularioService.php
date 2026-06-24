@@ -13,7 +13,6 @@ class FormularioService
 
     public function listar(): Collection
     {
-        // EmpresaScope filtra automáticamente por X-Empresa-Id.
         return Formulario::with('modulos')->orderBy('formulario')->get();
     }
 

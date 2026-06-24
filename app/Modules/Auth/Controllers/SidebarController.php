@@ -12,11 +12,10 @@ class SidebarController extends Controller
 
     public function index(Request $request)
     {
-        $user      = $request->user();
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
+        $user = $request->user();
 
         return response()->json([
-            'data' => $this->permissionService->getSidebar($user, $idEmpresa),
+            'data' => $this->permissionService->getSidebar($user),
         ]);
     }
 }

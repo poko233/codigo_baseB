@@ -18,8 +18,7 @@ class PermisoController extends Controller
 
     public function index(Request $request, int $idRol)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $permisos  = $this->permisoService->getPermisosByRol($idRol, $idEmpresa);
+        $permisos = $this->permisoService->getPermisosByRol($idRol);
 
         return response()->json([
             'data'    => PermisoResource::collection($permisos),
@@ -30,14 +29,12 @@ class PermisoController extends Controller
     public function addPermiso(Request $request, int $idRol)
     {
         $request->validate([
-            'id_modulo'    => 'required|exists:modulo,id',
+            'id_modulo'     => 'required|exists:modulo,id',
             'id_formulario' => 'required|exists:formulario,id',
-            'id_accion'    => 'required|exists:accion,id',
+            'id_accion'     => 'required|exists:accion,id',
         ]);
 
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $permiso   = $this->permisoService->addPermiso($idRol, $request->all(), $idEmpresa);
-
+        $permiso = $this->permisoService->addPermiso($idRol, $request->all());
         $this->permissionService->forgetPermisosDeRol($idRol);
 
         return response()->json([
@@ -48,9 +45,7 @@ class PermisoController extends Controller
 
     public function sync(PermisoRequest $request, int $idRol)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $permisos  = $this->permisoService->syncPermisos($idRol, $request->permisos, $idEmpresa);
-
+        $permisos = $this->permisoService->syncPermisos($idRol, $request->permisos);
         $this->permissionService->forgetPermisosDeRol($idRol);
 
         return response()->json([
@@ -61,9 +56,7 @@ class PermisoController extends Controller
 
     public function destroy(Request $request, int $rolId, int $formularioId, int $accionId)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $this->permisoService->removeByParams($rolId, $formularioId, $accionId, $idEmpresa);
-
+        $this->permisoService->removeByParams($rolId, $formularioId, $accionId);
         $this->permissionService->forgetPermisosDeRol($rolId);
 
         return response()->json([

@@ -6,6 +6,7 @@ use App\Modules\Auth\Services\PermissionService;
 use App\Modules\Rol\Models\Rol;
 use App\Modules\Rol\Repositories\RolRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class RolService
 {
@@ -14,9 +15,9 @@ class RolService
         private PermissionService $permissionService
     ) {}
 
-    public function listar(int $idEmpresa, array $filtros): LengthAwarePaginator
+    public function listar(array $filtros): LengthAwarePaginator
     {
-        return $this->repo->paginar($idEmpresa, $filtros);
+        return $this->repo->paginar($filtros);
     }
 
     public function detalle(Rol $rol): Rol
@@ -24,10 +25,10 @@ class RolService
         return $this->repo->conPermisos($rol);
     }
 
-    public function crear(array $datos, int $idEmpresa): Rol
+    public function crear(array $datos): Rol
     {
         return $this->repo->crear([
-            'id_empresa'  => $idEmpresa,
+            'id_empresa'  => 1,
             'rol'         => $datos['rol'],
             'descripcion' => $datos['descripcion'] ?? null,
             'estado'      => $datos['estado']       ?? 'Activo',
@@ -38,7 +39,6 @@ class RolService
     {
         unset($datos['id_empresa']);
         $actualizado = $this->repo->actualizar($rol, $datos);
-         $this->permissionService->forgetTodosRolesPermisos($rol->id_empresa); 
         $this->permissionService->forgetPermisosDeRol($rol->id);
         return $actualizado;
     }
@@ -47,7 +47,6 @@ class RolService
     {
         $this->repo->sincronizarPermisos($rol, $permisos);
         $this->permissionService->forgetPermisosDeRol($rol->id);
-        $this->permissionService->forgetTodosRolesPermisos($rol->id_empresa);
         return $this->repo->conPermisos($rol);
     }
 
@@ -57,22 +56,11 @@ class RolService
             abort(422, 'No se puede eliminar un rol que tiene usuarios asignados.');
         }
         $this->permissionService->forgetPermisosDeRol($rol->id);
-        $this->permissionService->forgetTodosRolesPermisos($rol->id_empresa); 
         $this->repo->eliminar($rol);
     }
 
-   public function listarConPermisos(int $idEmpresa): \Illuminate\Support\Collection
+    public function listarConPermisos(): Collection
     {
-        $cached = $this->permissionService->getTodosRolesPermisos($idEmpresa);
-        if ($cached !== null) {
-            return collect($cached);
-        }
-
-        $roles = $this->repo->todosConPermisos($idEmpresa);
-
-        $this->permissionService->setTodosRolesPermisos($idEmpresa, $roles->toArray());
-
-        return $roles;
+        return $this->repo->todosConPermisos();
     }
 }
-

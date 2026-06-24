@@ -18,19 +18,11 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $data = $request->validated();
-        $result = $this->authService->attemptLogin(
-            $data['usuario'],
-            $data['password'],
-            $data['empresa']
-        );
+        $data   = $request->validated();
+        $result = $this->authService->attemptLogin($data['usuario'], $data['password']);
 
         return response()->json([
             'token'   => $result['token'],
-            'empresa' => [
-                'id'     => $result['empresa_id'],
-                'nombre' => $result['empresa_nombre'],
-            ],
             'message' => 'Inicio de sesión exitoso',
         ]);
     }
@@ -44,38 +36,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
-        $empresaId = $request->header('X-Empresa-Id');
-
-        // Cargar empresas (solo id y nombre)
-        $user->load([
-            'empresas' => function ($query) {
-                $query->select('empresa.id', 'empresa.empresa');
-            },
-            'roles' => function ($query) use ($empresaId) {
-                if ($empresaId) {
-                    $query->where('rol.id_empresa', (int) $empresaId);
-                }
-                $query->select('rol.id', 'rol.rol', 'rol.id_empresa', 'rol.estado');
-            },
-        ]);
-
-        // Obtener todas las sucursales del usuario (sin filtrar por empresa activa)
-        $sucursales = \App\Modules\Sucursal\Models\Sucursal::select(
-            'sucursal.id',
-            'sucursal.sucursal',
-            'sucursal.id_empresa',
-            'sucursal.estado'
-        )
-            ->join('user_sucursal', 'user_sucursal.id_sucursal', '=', 'sucursal.id')
-            ->where('user_sucursal.id_user', $user->id)
-            ->get()
-            ->groupBy('id_empresa');
-
-        // Anidar sucursales dentro de cada empresa
-        foreach ($user->empresas as $empresa) {
-            $empresaSucursales = $sucursales->get($empresa->id, collect([]));
-            $empresa->setRelation('sucursales', $empresaSucursales);
-        }
+        $user->load(['roles', 'sucursales']);
 
         return response()->json([
             'data'    => new UserProfileResource($user),
@@ -85,21 +46,19 @@ class AuthController extends Controller
 
     public function mePermisos(Request $request)
     {
-        $user      = $request->user();
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
+        $user = $request->user();
 
         return response()->json([
-            'data' => $this->permissionService->getPermisos($user, $idEmpresa),
+            'data' => $this->permissionService->getPermisos($user),
         ]);
     }
 
     public function sidebar(Request $request)
     {
-        $user      = $request->user();
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
+        $user = $request->user();
 
         return response()->json([
-            'data' => $this->permissionService->getSidebar($user, $idEmpresa),
+            'data' => $this->permissionService->getSidebar($user),
         ]);
     }
 }

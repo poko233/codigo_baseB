@@ -7,7 +7,6 @@ use App\Modules\Formulario\Models\Formulario;
 use App\Modules\Formulario\Requests\FormularioRequest;
 use App\Modules\Formulario\Resource\FormularioResource;
 use App\Modules\Formulario\Services\FormularioService;
-use Illuminate\Http\Request;
 
 class FormularioController extends Controller
 {
@@ -20,8 +19,7 @@ class FormularioController extends Controller
 
     public function store(FormularioRequest $request)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $formulario = $this->formularioService->crear($request->validated(), $idEmpresa);
+        $formulario = $this->formularioService->crear($request->validated(), 1);
         return (new FormularioResource($formulario))->response()->setStatusCode(201);
     }
 

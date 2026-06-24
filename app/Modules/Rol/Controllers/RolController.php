@@ -17,13 +17,7 @@ class RolController extends Controller
 
     public function index(Request $request)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-
-        $roles = $this->service->listar(
-            $idEmpresa,
-            $request->only(['estado', 'buscar', 'por_pagina'])
-        );
-
+        $roles = $this->service->listar($request->only(['estado', 'buscar', 'por_pagina']));
         return RolResource::collection($roles);
     }
 
@@ -34,8 +28,7 @@ class RolController extends Controller
 
     public function store(StoreRolRequest $request)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $rol = $this->service->crear($request->validated(), $idEmpresa);
+        $rol = $this->service->crear($request->validated());
         return (new RolResource($rol))->response()->setStatusCode(201);
     }
 
@@ -51,11 +44,7 @@ class RolController extends Controller
 
     public function syncPermisos(SyncPermisosRequest $request, Rol $rol)
     {
-        $rol = $this->service->sincronizarPermisos(
-            $rol,
-            $request->validated()['permisos']
-        );
-
+        $rol = $this->service->sincronizarPermisos($rol, $request->validated()['permisos']);
         return new RolResource($rol);
     }
 
@@ -67,8 +56,7 @@ class RolController extends Controller
 
     public function todosConPermisos(Request $request)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $roles = $this->service->listarConPermisos($idEmpresa);
+        $roles = $this->service->listarConPermisos();
         return RolResource::collection($roles);
     }
 }

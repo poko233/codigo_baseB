@@ -7,7 +7,6 @@ use App\Modules\Modulo\Models\Modulo;
 use App\Modules\Modulo\Requests\ModuloRequest;
 use App\Modules\Modulo\Resource\ModuloResource;
 use App\Modules\Modulo\Services\ModuloService;
-use Illuminate\Http\Request;
 
 class ModuloController extends Controller
 {
@@ -20,8 +19,7 @@ class ModuloController extends Controller
 
     public function store(ModuloRequest $request)
     {
-        $idEmpresa = (int) $request->header('X-Empresa-Id');
-        $modulo = $this->moduloService->crear($request->validated(), $idEmpresa);
+        $modulo = $this->moduloService->crear($request->validated(), 1);
         return (new ModuloResource($modulo))->response()->setStatusCode(201);
     }
 

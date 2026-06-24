@@ -14,17 +14,8 @@ class StoreRolRequest extends FormRequest
 
     public function rules(): array
     {
-        $idEmpresa = (int) $this->header('X-Empresa-Id');
-
         return [
-            // id_empresa NO se valida ni se acepta desde el body.
-            // Siempre se toma del header X-Empresa-Id en el controller.
-            'rol' => [
-                'required',
-                'string',
-                'max:40',
-                Rule::unique('rol')->where('id_empresa', $idEmpresa),
-            ],
+            'rol'         => ['required', 'string', 'max:40', Rule::unique('rol')],
             'descripcion' => ['nullable', 'string'],
             'estado'      => ['nullable', 'in:Activo,Inactivo'],
         ];
@@ -33,7 +24,7 @@ class StoreRolRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'rol.unique' => 'Ya existe un rol con este nombre en la empresa.',
+            'rol.unique' => 'Ya existe un rol con este nombre.',
         ];
     }
 }

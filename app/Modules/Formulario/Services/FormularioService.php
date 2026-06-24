@@ -57,10 +57,6 @@ class FormularioService
 
     public function eliminar(Formulario $formulario): void
     {
-        if ($formulario->permisos()->exists()) {
-            abort(422, 'No se puede eliminar el formulario porque tiene permisos asignados a roles.');
-        }
-
         $this->invalidarCacheDeFormulario($formulario->id);
         $formulario->delete();
     }

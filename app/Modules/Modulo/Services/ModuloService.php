@@ -57,10 +57,6 @@ class ModuloService
 
     public function eliminar(Modulo $modulo): void
     {
-        if ($modulo->formularios()->exists()) {
-            abort(422, 'No se puede eliminar el módulo porque tiene formularios asignados.');
-        }
-
         $this->invalidarCacheDeModulo($modulo->id);
         $modulo->delete();
     }

@@ -69,6 +69,7 @@ class PermissionService
     public function forgetPermisos(int $idUser): void
     {
         Cache::forget($this->cacheKey($idUser));
+        Cache::forget("user_is_super:{$idUser}");
     }
 
     public function forgetPermisosDeRol(int $idRol): void

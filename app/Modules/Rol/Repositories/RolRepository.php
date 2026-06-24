@@ -30,14 +30,17 @@ class RolRepository
 
     public function conPermisos(Rol $rol): Rol
     {
+        $modulosActivos     = Modulo::where('estado', 'Activo')->pluck('id');
+        $formulariosActivos = Formulario::where('estado', 'Activo')->pluck('id');
+
         return $rol->load([
-            'permisos' => function ($query) {
-                $query->whereHas('modulo', fn ($q) => $q->where('estado', 'Activo'))
-                      ->whereHas('formulario', fn ($q) => $q->where('estado', 'Activo'));
-            },
-            'permisos.modulo',
-            'permisos.formulario',
-            'permisos.accion',
+            'permisos' => fn ($q) => $q
+                ->select('id', 'id_rol', 'id_modulo', 'id_formulario', 'id_accion')
+                ->whereIn('id_modulo', $modulosActivos)
+                ->whereIn('id_formulario', $formulariosActivos),
+            'permisos.modulo:id,modulo,icono',
+            'permisos.formulario:id,formulario,ruta',
+            'permisos.accion:id,accion',
         ]);
     }
 
@@ -98,14 +101,17 @@ class RolRepository
 
     public function todosConPermisos(): Collection
     {
+        $modulosActivos     = Modulo::where('estado', 'Activo')->pluck('id');
+        $formulariosActivos = Formulario::where('estado', 'Activo')->pluck('id');
+
         return Rol::with([
-            'permisos' => function ($query) {
-                $query->whereHas('modulo',     fn ($q) => $q->where('estado', 'Activo'))
-                      ->whereHas('formulario', fn ($q) => $q->where('estado', 'Activo'));
-            },
-            'permisos.modulo',
-            'permisos.formulario',
-            'permisos.accion',
+            'permisos' => fn ($q) => $q
+                ->select('id', 'id_rol', 'id_modulo', 'id_formulario', 'id_accion')
+                ->whereIn('id_modulo', $modulosActivos)
+                ->whereIn('id_formulario', $formulariosActivos),
+            'permisos.modulo:id,modulo,icono',
+            'permisos.formulario:id,formulario,ruta',
+            'permisos.accion:id,accion',
         ])
         ->orderBy('rol')
         ->get();
